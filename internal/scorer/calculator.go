@@ -85,41 +85,107 @@ func (c *Calculator) CalculateTotal(dimensions models.DimensionScores) float64 {
 	return total
 }
 
+// RedFlagPenalty 红旗规则惩罚因子配置
+type RedFlagPenalty struct {
+	// 乘法因子：分数 * factor，factor < 1 表示扣分
+	Factor float64
+	// 最大扣分比例（基于当前分数）
+	MaxDeductionRate float64
+}
+
+// 红旗规则惩罚配置
+var redFlagPenalties = map[models.RuleType]RedFlagPenalty{
+	// Signal 4: 引用异常 - 严重问题，扣分50%
+	models.RuleTypeCitationAnomaly: {Factor: 0.50, MaxDeductionRate: 0.50},
+	// Signal 8: 知识截止日期 - 严重问题，扣分50%
+	models.RuleTypeKnowledgeCutoff: {Factor: 0.50, MaxDeductionRate: 0.50},
+	// Signal 6: Markdown残留 - 中等问题，最大扣分20%
+	models.RuleTypeMarkdown: {Factor: 0.80, MaxDeductionRate: 0.20},
+	// Signal 7: 表情符号异常 - 轻微问题，最大扣分10%
+	models.RuleTypeEmoji: {Factor: 0.90, MaxDeductionRate: 0.10},
+}
+
+// 最低保底分数：即使检测到严重问题，也保留最低分数以区分程度
+const MinimumScore = 5.0
+
 // CalculateTotalWithRedFlags 计算总分（考虑红旗规则）
+// 使用乘法递减机制替代减法扣分，避免分数骤降到0
 func (c *Calculator) CalculateTotalWithRedFlags(dimensions models.DimensionScores, results []models.RuleResult) float64 {
 	total := c.CalculateTotal(dimensions)
 
-	// 检查关键"红旗"规则
+	// 使用乘法因子扣分，避免分数变成负数
+	// 例如：基础分100，两个红旗各扣50% → 100 * 0.5 * 0.5 = 25，而非100 - 50 - 50 = 0
+
 	// Signal 4: 引用异常（任何检测到都是严重问题）
 	citationResult := c.findRuleResult(results, models.RuleTypeCitationAnomaly)
 	if citationResult != nil && citationResult.Detected {
-		// 引用异常是明确的AI标记，直接扣50分
-		total -= 50
+		penalty := redFlagPenalties[models.RuleTypeCitationAnomaly]
+		// 根据检测严重程度调整惩罚因子
+		adjustedFactor := c.adjustFactorBySeverity(penalty.Factor, citationResult.Score)
+		total *= adjustedFactor
 	}
 
 	// Signal 8: 知识截止日期（任何检测到都是严重问题）
 	knowledgeCutoffResult := c.findRuleResult(results, models.RuleTypeKnowledgeCutoff)
 	if knowledgeCutoffResult != nil && knowledgeCutoffResult.Detected {
-		// 知识截止日期是明确的AI标记，直接扣50分
-		total -= 50
+		penalty := redFlagPenalties[models.RuleTypeKnowledgeCutoff]
+		adjustedFactor := c.adjustFactorBySeverity(penalty.Factor, knowledgeCutoffResult.Score)
+		total *= adjustedFactor
 	}
 
-	// Signal 6: Markdown残留
+	// Signal 6: Markdown残留（中等问题，按严重程度递减）
 	markdownResult := c.findRuleResult(results, models.RuleTypeMarkdown)
 	if markdownResult != nil && markdownResult.Detected {
-		deduction := (100.0 - markdownResult.Score) / 100.0 * 15
-		total -= deduction
+		penalty := redFlagPenalties[models.RuleTypeMarkdown]
+		// Markdown的惩罚程度基于检测到的问题严重程度
+		severityRate := (100.0 - markdownResult.Score) / 100.0
+		// 惩罚因子范围: [penalty.Factor, 1.0]，问题越严重，惩罚越重
+		factor := 1.0 - (severityRate * penalty.MaxDeductionRate)
+		total *= factor
 	}
 
-	// 确保总分在0-100范围内
-	if total < 0 {
-		total = 0
+	// Signal 7: 表情符号异常（轻微问题）
+	emojiResult := c.findRuleResult(results, models.RuleTypeEmoji)
+	if emojiResult != nil && emojiResult.Detected {
+		penalty := redFlagPenalties[models.RuleTypeEmoji]
+		severityRate := (100.0 - emojiResult.Score) / 100.0
+		factor := 1.0 - (severityRate * penalty.MaxDeductionRate)
+		total *= factor
+	}
+
+	// 应用最低保底分数
+	// 即使检测到所有红旗，也保留最低分数以区分严重程度
+	if total < MinimumScore {
+		total = MinimumScore
 	}
 	if total > 100 {
 		total = 100
 	}
 
 	return total
+}
+
+// adjustFactorBySeverity 根据检测严重程度调整惩罚因子
+// 检测分数越低，问题越严重，惩罚因子越小
+func (c *Calculator) adjustFactorBySeverity(baseFactor float64, detectionScore float64) float64 {
+	// detectionScore: 0-100，0表示严重问题，100表示轻微问题
+	// 严重程度: 0-1，1表示最严重
+	severity := (100.0 - detectionScore) / 100.0
+
+	// 基于严重程度调整因子
+	// 轻微问题：factor接近1（扣分少）
+	// 严重问题：factor接近baseFactor（扣分多）
+	// 公式: factor = 1 - (1 - baseFactor) * severity
+	// 当severity=1（最严重）时，factor=baseFactor
+	// 当severity=0（最轻微）时，factor=1
+	factor := 1.0 - (1.0-baseFactor)*severity
+
+	// 确保因子不低于baseFactor
+	if factor < baseFactor {
+		factor = baseFactor
+	}
+
+	return factor
 }
 
 // calculateVocabularyDiversity 计算词汇多样性评分

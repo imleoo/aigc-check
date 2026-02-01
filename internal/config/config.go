@@ -3,16 +3,19 @@ package config
 import (
 	"os"
 
+	"github.com/leoobai/aigc-check/internal/gemini"
 	"github.com/leoobai/aigc-check/internal/models"
 	"gopkg.in/yaml.v3"
 )
 
 // Config 应用配置
 type Config struct {
-	Thresholds Thresholds              `yaml:"thresholds"` // 规则阈值配置
-	Scoring    ScoringConfig           `yaml:"scoring"`    // 评分配置
-	Output     OutputConfig            `yaml:"output"`     // 输出配置
-	Rules      map[string]RuleConfig   `yaml:"rules"`      // 规则配置
+	Thresholds  Thresholds               `yaml:"thresholds"`  // 规则阈值配置
+	Scoring     ScoringConfig            `yaml:"scoring"`     // 评分配置
+	Output      OutputConfig             `yaml:"output"`      // 输出配置
+	Rules       map[string]RuleConfig    `yaml:"rules"`       // 规则配置
+	Multimodal  models.MultimodalConfig  `yaml:"multimodal"`  // 多模态配置
+	Gemini      gemini.Config            `yaml:"gemini"`      // Gemini API 配置
 }
 
 // ScoringConfig 评分配置
@@ -48,6 +51,8 @@ var DefaultConfig = Config{
 		Verbose:       false,
 		ColorEnabled:  true,
 	},
+	Multimodal: models.DefaultMultimodalConfig,
+	Gemini:     gemini.DefaultConfig(),
 	Rules: map[string]RuleConfig{
 		string(models.RuleTypeHighFreqWords): {
 			Enabled:   true,
@@ -156,6 +161,11 @@ func mergeWithDefaults(config *Config) {
 	}
 	if config.Output.Language == "" {
 		config.Output.Language = DefaultConfig.Output.Language
+	}
+
+	// 检查环境变量覆盖 Gemini API Key
+	if apiKey := os.Getenv("GEMINI_API_KEY"); apiKey != "" {
+		config.Gemini.APIKey = apiKey
 	}
 }
 

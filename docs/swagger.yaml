@@ -1,0 +1,332 @@
+basePath: /
+definitions:
+  handlers.DetectOptions:
+    description: 检测选项配置
+    properties:
+      enable_multimodal:
+        example: false
+        type: boolean
+      enable_semantic:
+        example: false
+        type: boolean
+      enable_statistics:
+        example: false
+        type: boolean
+      language:
+        example: zh
+        type: string
+    type: object
+  handlers.DetectRequest:
+    description: 检测请求参数
+    properties:
+      options:
+        $ref: '#/definitions/handlers.DetectOptions'
+      text:
+        example: 这是一段需要检测的文本
+        type: string
+    required:
+    - text
+    type: object
+  handlers.DetectionResultResponse:
+    description: 检测结果数据
+    properties:
+      detected_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      process_time:
+        example: 150ms
+        type: string
+      request_id:
+        example: req-12345
+        type: string
+      risk_level:
+        example: medium
+        type: string
+      score:
+        example: 75.5
+        type: number
+      text:
+        example: 检测的原始文本
+        type: string
+    type: object
+  handlers.HistoryItemResult:
+    description: 历史记录条目
+    properties:
+      created_at:
+        example: "2024-01-15 10:30:00"
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      request_id:
+        example: req-12345
+        type: string
+      risk_level:
+        example: medium
+        type: string
+      score:
+        example: 75.5
+        type: number
+      text_preview:
+        example: 这是检测文本的预览...
+        type: string
+    type: object
+  handlers.HistoryListResponse:
+    description: 历史记录列表
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/handlers.HistoryItemResult'
+        type: array
+      page:
+        example: 1
+        type: integer
+      page_size:
+        example: 20
+        type: integer
+      total:
+        example: 100
+        type: integer
+    type: object
+  handlers.Response:
+    description: API 通用响应格式
+    properties:
+      code:
+        example: 0
+        type: integer
+      data: {}
+      message:
+        example: success
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: https://github.com/leoobai/aigc-check
+  description: AI生成内容检测服务API，用于检测文本是否由AI生成
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: AIGC-Check API
+  version: "1.0"
+paths:
+  /api/v1/detect:
+    post:
+      consumes:
+      - application/json
+      description: 对输入文本进行AI生成内容检测，返回检测分数和风险等级
+      parameters:
+      - description: 检测请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.DetectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 检测成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/handlers.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.DetectionResultResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: 执行AI内容检测
+      tags:
+      - detection
+  /api/v1/detect/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根据检测ID获取详细的检测结果
+      parameters:
+      - description: 检测结果ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/handlers.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.DetectionResultResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "404":
+          description: 结果不存在
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: 获取检测结果详情
+      tags:
+      - detection
+  /api/v1/history:
+    delete:
+      consumes:
+      - application/json
+      description: 清空所有检测历史记录
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: 删除所有历史记录
+      tags:
+      - history
+    get:
+      consumes:
+      - application/json
+      description: 分页获取检测历史记录列表
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量
+        in: query
+        maximum: 100
+        minimum: 1
+        name: page_size
+        type: integer
+      - default: created_at
+        description: 排序字段
+        enum:
+        - created_at
+        - score
+        - risk_level
+        in: query
+        name: sort
+        type: string
+      - default: desc
+        description: 排序方向
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/handlers.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.HistoryListResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: 获取历史记录列表
+      tags:
+      - history
+  /api/v1/history/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据ID删除单条历史记录
+      parameters:
+      - description: 历史记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: 删除历史记录
+      tags:
+      - history
+    get:
+      consumes:
+      - application/json
+      description: 根据ID获取单条历史记录的详细信息
+      parameters:
+      - description: 历史记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/handlers.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.DetectionResultResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "404":
+          description: 记录不存在
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: 获取历史记录详情
+      tags:
+      - history
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

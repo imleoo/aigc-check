@@ -1,10 +1,12 @@
-# AIGC-Check 默认配置文件
+# AIGC-Check 配置文件 v1.0.0
+# severity级别: critical > high > medium > low
 
-# 规则阈值配置
 thresholds:
   # Signal 1: 高频词汇检测
   high_frequency_words:
     keywords:
+      # === 英文高频词 ===
+      # 强调性形容词
       - crucial
       - pivotal
       - vital
@@ -12,171 +14,1598 @@ thresholds:
       - revolutionary
       - profound
       - significant
+      - essential
+      - paramount
+      - fundamental
+      - transformative
+      - innovative
+      - comprehensive
+      - substantial
+      - remarkable
+      - unprecedented
+      - noteworthy
+      - considerable
+      - outstanding
+      - compelling
+      - intriguing
+      - critical
+      - indispensable
+      - exceptional
+      - distinctive
+      - paradigm-shifting
+      - seminal
+      - emergent
+      - robust
+      - holistic
+      - nuanced
+      - multifaceted
+      - intricate
+      - sophisticated
+      - meticulous
+      - rigorous
+      - streamlined
+      - cutting-edge
+      - state-of-the-art
+      - best-in-class
+      - world-class
+      - game-changing
+      - trailblazing
+      - pioneering
+      - visionary
+      - forward-thinking
+      - thought-provoking
+      - insightful
+      - actionable
+      - impactful
+      - scalable
+      - sustainable
+      - resilient
+      - agile
+      - dynamic
+      - vibrant
+      - thriving
+      - flourishing
+      - burgeoning
+      # 商业/科技术语
+      - leverage
+      - synergy
+      - paradigm
+      - ecosystem
+      - empower
+      - seamless
+      - optimize
+      - accelerate
+      - facilitate
+      - enhance
+      - streamline
+      - revolutionize
+      - spearhead
+      - orchestrate
+      - catalyze
+      - propel
+      - bolster
+      - amplify
+      - augment
+      - harness
+      - cultivate
+      - foster
+      - nurture
+      - champion
+      - underscore
+      - illuminate
+      - elucidate
+      - epitomize
+      - exemplify
+      - embody
+      - encapsulate
+      - underscore
+      - delve
+      - navigate
+      - pivot
+      - iterate
+      - onboard
+      - offboard
+      - upskill
+      - reskill
+      - bandwidth
+      - touchpoint
+      - pain point
+      - value proposition
+      - stakeholder
+      - synergize
+      - incentivize
+      - monetize
+      - operationalize
+      - contextualize
+      - conceptualize
+      - strategize
+      # === 中文高频词 ===
+      # 强调性词汇
       - 关键
       - 至关重要
       - 革命性
       - 突破性
+      - 深刻
+      - 全面
+      - 核心
+      - 重要
+      - 非凡
+      - 前所未有
+      - 杰出
+      - 值得注意
+      - 卓越
+      - 唯一
+      - 不可或缺
+      - 重大意义
+      - 划时代
+      - 颠覆性
+      - 创新
+      - 优化
+      - 赋能
+      - 协同
+      - 加速
+      - 无缝
+      - 生态
+      - 显著
+      - 深远
+      - 广泛
+      - 高度
+      - 极其
+      - 尤为
+      - 格外
+      - 尤其
+      - 特别
+      - 相当
+      - 极大
+      - 巨大
+      - 庞大
+      - 强大
+      - 卓有成效
+      - 行之有效
+      - 切实可行
+      - 意义深远
+      - 影响深远
+      - 举足轻重
+      - 不可估量
+      - 独树一帜
+      - 独具匠心
+      - 别具一格
+      - 与众不同
+      - 首屈一指
+      - 名列前茅
+      - 遥遥领先
+      - 有目共睹
+      - 有口皆碑
+      # 商业/科技术语
+      - 赋能
+      - 抓手
+      - 闭环
+      - 打通
+      - 沉淀
+      - 复盘
+      - 对齐
+      - 拉通
+      - 串联
+      - 落地
+      - 聚焦
+      - 链路
+      - 漏斗
+      - 颗粒度
+      - 方法论
+      - 组合拳
+      - 引爆点
+      - 护城河
+      - 天花板
+      - 底层逻辑
+      - 顶层设计
+      - 长尾效应
+      - 降维打击
+      - 弯道超车
+      - 换道超车
+      - 破圈
+      - 出圈
+      - 种草
+      - 拔草
+      - 私域
+      - 公域
+      - 流量池
+      - 用户画像
+      - 心智占领
+      - 品牌势能
+      - 产品力
+      - 场景化
+      - 数字化
+      - 智能化
+      - 精细化
+      - 体系化
+      - 系统化
+      - 标准化
+      - 规范化
+      - 常态化
+      - 制度化
     threshold: 3
 
   # Signal 2: 句式开头检测
   sentence_starters:
     patterns:
+      # === 英文连接词 ===
+      # 递进类
       - Additionally
       - Furthermore
       - Moreover
+      - In addition
+      - What's more
+      - Besides
+      - Also
+      - Plus
+      - On top of that
+      - Not only that
+      - Beyond that
+      - Equally important
+      - More importantly
+      - Most importantly
+      # 因果类
+      - Therefore
+      - Consequently
+      - As a result
+      - Hence
+      - Thus
+      - Accordingly
+      - For this reason
+      - Because of this
+      - Due to this
+      - This leads to
+      - This results in
+      - This means that
+      # 转折类
+      - However
+      - Nevertheless
+      - Nonetheless
+      - On the other hand
+      - Conversely
+      - In contrast
+      - Despite this
+      - Yet
+      - Still
+      - Even so
+      - That said
+      - Having said that
+      - Be that as it may
+      # 总结类
+      - In conclusion
+      - To summarize
+      - In summary
+      - To sum up
+      - Overall
+      - All in all
+      - In essence
+      - Ultimately
+      - Finally
+      - Lastly
+      - To conclude
+      - In the end
+      - At the end of the day
+      # 强调类
+      - Notably
+      - Importantly
+      - Significantly
+      - Crucially
+      - Particularly
+      - Especially
+      - Specifically
+      - In particular
+      - It is important to note
+      - It should be noted
+      - It is worth noting
+      - It is worth mentioning
+      - It bears mentioning
+      - It goes without saying
+      # 观点类
+      - Clearly
+      - Obviously
+      - Evidently
+      - Certainly
+      - Undoubtedly
+      - Unquestionably
+      - Without a doubt
+      - Admittedly
+      - Arguably
+      - Presumably
+      - Apparently
+      - Seemingly
+      # 解释类
+      - In other words
+      - That is to say
+      - Put simply
+      - Simply put
+      - To put it simply
+      - To put it another way
+      - Essentially
+      - Basically
+      - Fundamentally
+      - In essence
+      - At its core
+      # 时间/顺序类
+      - First
+      - Firstly
+      - Second
+      - Secondly
+      - Third
+      - Thirdly
+      - Next
+      - Then
+      - Subsequently
+      - Meanwhile
+      - At the same time
+      - Simultaneously
+      - Previously
+      - Following this
+      # 条件类
+      - If
+      - Given that
+      - Assuming that
+      - Provided that
+      - In the event that
+      - Should this
+      - Were this
+      # AI特有句式
+      - Let me
+      - Allow me to
+      - I'd like to
+      - I would like to
+      - It's important to understand
+      - It's crucial to
+      - It's essential to
+      - It's worth exploring
+      - Let's explore
+      - Let's dive into
+      - Let's delve into
+      - Let's examine
+      - Let's consider
+      - Let's look at
+      - Let's discuss
+      - Let's break down
+      - Let's unpack
+      - Here's the thing
+      - Here's what
+      - Here's why
+      - Here's how
+      - The key is
+      - The key point is
+      - The bottom line is
+      - The takeaway is
+      - The reality is
+      - The truth is
+      - The fact is
+      - The thing is
+      - As we can see
+      - As mentioned
+      - As noted
+      - As stated
+      - As discussed
+      - As highlighted
+      - As outlined
+      - As demonstrated
+      - As illustrated
+      # === 中文连接词 ===
+      # 递进类
       - 此外
       - 另外
       - 而且
+      - 并且
+      - 同时
+      - 不仅如此
+      - 更重要的是
+      - 更为重要的是
+      - 除此之外
+      - 与此同时
+      - 不仅如此
+      - 更有甚者
+      - 更进一步
+      - 进一步说
+      # 因果类
+      - 因此
+      - 所以
+      - 故而
+      - 由此可见
+      - 因而
+      - 从而
+      - 以至于
+      - 正因如此
+      - 基于此
+      - 鉴于此
+      - 有鉴于此
+      - 综上所述
+      - 这意味着
+      - 这表明
+      - 这说明
+      # 转折类
+      - 然而
+      - 但是
+      - 不过
+      - 尽管如此
+      - 虽然如此
+      - 话虽如此
+      - 相反
+      - 反之
+      - 另一方面
+      - 与此相反
+      - 恰恰相反
+      # 总结类
+      - 总之
+      - 总的来说
+      - 总而言之
+      - 综上
+      - 综上所述
+      - 归根结底
+      - 概括地说
+      - 简言之
+      - 简而言之
+      - 一言以蔽之
+      - 最终
+      - 最后
+      # 强调类
+      - 值得注意的是
+      - 值得一提的是
+      - 值得强调的是
+      - 需要指出的是
+      - 需要强调的是
+      - 应该注意的是
+      - 显然
+      - 显而易见
+      - 毫无疑问
+      - 不容置疑
+      - 无可否认
+      - 不可否认
+      - 当然
+      - 诚然
+      - 固然
+      - 尤其是
+      - 特别是
+      - 尤为重要的是
+      # 解释类
+      - 换句话说
+      - 换言之
+      - 也就是说
+      - 具体来说
+      - 具体而言
+      - 简单来说
+      - 本质上
+      - 从本质上讲
+      - 实际上
+      - 事实上
+      - 说白了
+      # AI特有句式
+      - 让我们
+      - 我们来看
+      - 我们来探讨
+      - 我们需要
+      - 我们可以看到
+      - 我们不难发现
+      - 不难看出
+      - 可以看出
+      - 可以发现
+      - 可以说
+      - 可以认为
+      - 需要注意的是
+      - 有趣的是
+      - 令人惊讶的是
+      - 令人欣慰的是
+      - 不容忽视的是
+      - 关键在于
+      - 核心在于
+      - 重点在于
+      - 问题在于
+      - 答案是
+      - 原因在于
+      - 秘诀在于
+      - 首先
+      - 其次
+      - 再次
+      - 最后
+      - 第一
+      - 第二
+      - 第三
     threshold: 5
 
-  # Signal 3: 虚假范围表达
+  # Signal 3: 虚假范围表达检测
   false_range:
     patterns:
       - "from .+ to .+"
+      - "from\\s+\\w+\\s+to\\s+\\w+"
       - "从.+到.+"
+      - "between .+ and .+"
+      - "ranging from .+ to .+"
+      - "spans from .+ to .+"
+      - "covers .+ to .+"
+      - "encompasses .+ to .+"
+      - "涵盖.+到.+"
+      - "跨越.+到.+"
+      - "介于.+之间"
+      - "从.+一直到.+"
     threshold: 2
 
   # Signal 4: 引用异常检测
   citation_anomaly:
     utm_patterns:
+      # ChatGPT/OpenAI
+      - utm_source=chatgpt
       - utm_source=chatgpt.com
       - utm_source=openai
+      - utm_source=openai.com
+      - utm_medium=chatgpt
+      - utm_medium=openai
+      - utm_campaign=chatgpt
+      - utm_campaign=openai
+      # Claude/Anthropic
+      - utm_source=claude
+      - utm_source=claude.ai
+      - utm_source=anthropic
+      - utm_medium=claude
+      - utm_campaign=claude
+      # Google/Gemini
+      - utm_source=gemini
+      - utm_source=bard
+      - utm_source=google_ai
+      - utm_medium=gemini
+      # 其他AI平台
+      - utm_source=deepseek
+      - utm_source=cohere
+      - utm_source=mistral
+      - utm_source=perplexity
+      - utm_source=copilot
+      - utm_source=bing_chat
+      - utm_source=you.com
+      - utm_source=jasper
+      - utm_source=writesonic
+      - utm_source=copy.ai
+      - utm_source=notion_ai
+      - utm_source=grammarly
+      - utm_source=quillbot
+      - utm_source=ai-assistant
+      - utm_campaign=ai-assistant
+      - utm_medium=ai
+      - ref=chatgpt
+      - ref=claude
+      - ref=ai_assistant
+
     ghost_markers:
+      # OpenAI特有标记
       - "contentReference[oaicite:"
       - "[oai_citation:"
-      - turn0search
-    placeholder_dates:
-      - "2025-XX-XX"
-      - "YYYY-MM-DD"
-      - "20XX"
+      - "turn0search"
+      - "【oaicite:"
+      - "oaicite:"
+      - "[^1^]"
+      - "[^2^]"
+      - "[^3^]"
+      # 通用引用占位符
+      - "[citation:"
+      - "[cite:"
+      - "[Cite:"
+      - "[CITE:"
+      - "[ref:"
+      - "[Ref:"
+      - "[REF:"
+      - "[source:"
+      - "[Source:"
+      - "[SOURCE:"
+      - "[Reference"
+      - "[REFERENCE:"
+      - "{citation}"
+      - "{reference}"
+      - "{source}"
+      - "{{citation}}"
+      - "{{reference}}"
+      - "<citation>"
+      - "<reference>"
+      - "[URL:"
+      - "[LINK:"
+      - "LINK:"
+      # 搜索结果标记
+      - "[search_result"
+      - "based on search result"
+      - "according to search"
+      - "from search results"
+      - "search results show"
+      - "web search indicates"
+      - "online sources suggest"
+      # 来源标记
+      - "From:"
+      - "Via:"
+      - "Found at:"
+      - "Retrieved from:"
+      - "Accessed from:"
+      - "Source link:"
+      - "Original source:"
+      # 中文标记
+      - "【引用】"
+      - "【来源】"
+      - "【参考】"
+      - "[引用]"
+      - "[来源]"
+      - "[参考]"
+      - "来源："
+      - "引用自："
+      - "参考来源："
+      - "数据来源："
+      - "图片来源："
+      - "资料来源："
 
-  # Signal 5: 破折号密度 (每千字)
+    placeholder_dates:
+      # 日期占位符
+      - "2025-XX-XX"
+      - "2026-XX-XX"
+      - "YYYY-MM-DD"
+      - "MM/DD/YYYY"
+      - "DD/MM/YYYY"
+      - "20XX"
+      - "202X"
+      - "[DATE]"
+      - "[date]"
+      - "[YYYY]"
+      - "[MM]"
+      - "[DD]"
+      - "{date}"
+      - "{{date}}"
+      - "<date>"
+      - "$DATE"
+      - "${DATE}"
+      - "TBD"
+      - "N/A"
+      - "待定"
+      - "待补充"
+      - "待更新"
+      - "[待定]"
+      - "[未知]"
+      - "Not specified"
+      - "Not available"
+      - "Unknown date"
+      - "Date unknown"
+      - "Date TBD"
+      - "As of [date]"
+      - "Last updated: [date]"
+      - "Published: [date]"
+      - "Updated on [date]"
+      - "Accessed [date]"
+      - "截至[日期]"
+      - "更新于[日期]"
+      - "发布于[日期]"
+
+  # Signal 5: 破折号密度检测 (每千字)
   em_dash_density: 5.0
 
-  # Signal 6: Markdown残留
+  # Signal 6: Markdown残留检测
   markdown_residue:
     patterns:
-      - "##"
-      - "**"
-      - "[.+]\\(.+\\)"
+      # 标题与格式
+      - "##+"
+      - "\\*\\*[^\\*]+\\*\\*"
+      - "__[^_]+__"
+      - "\\*[^\\*]+\\*"
+      - "_[^_]+_"
+      - "~~[^~]+~~"
+      - "==[^=]+=="
+      # 链接与图片
+      - "\\[.+\\]\\(.+\\)"
+      - "!\\[.+\\]\\(.+\\)"
+      - "\\[.+\\]\\[.+\\]"
+      # 代码
       - "```"
+      - "`[^`]+`"
+      # 列表
+      - "^[-*+]\\s"
+      - "^\\d+\\.\\s"
+      - "^\\s*[-*+]\\s"
+      - "^\\s*\\d+\\.\\s"
+      - "- \\[ \\]"
+      - "- \\[x\\]"
+      # 引用与分隔
+      - "^>\\s"
+      - "^>>\\s"
+      - "---"
+      - "\\*\\*\\*"
+      - "___"
+      # 表格
+      - "\\| .+\\|"
+      - ":---"
+      - "---:"
+      - ":---:"
+      # 特殊标记
+      - "\\[TOC\\]"
+      - "\\[toc\\]"
+      - "\\[\\[.+\\]\\]"
+      - "footnote"
+      - "\\[\\^\\d+\\]"
+      # HTML标签
+      - "<br"
+      - "<div"
+      - "<span"
+      - "<img"
+      - "<a href"
+      - "<p>"
+      - "</p>"
+      - "<h[1-6]>"
+      - "</h[1-6]>"
+      - "<ul>"
+      - "<ol>"
+      - "<li>"
+      - "<table>"
+      - "<tr>"
+      - "<td>"
+      - "<th>"
+      - "<strong>"
+      - "<em>"
+      - "<code>"
+      - "<pre>"
+      - "<blockquote>"
+      - "&nbsp;"
+      - "&amp;"
+      - "&lt;"
+      - "&gt;"
+      - "&quot;"
+      - "&#\\d+;"
+      # 模板语法
+      - "\\\\n"
+      - "{%\\s"
+      - "{{.+}}"
+      - "<%.*%>"
+      - "${.*}"
+      # LaTeX残留
+      - "\\\\begin{.+}"
+      - "\\\\end{.+}"
+      - "\\\\textbf"
+      - "\\\\textit"
+      - "\\\\frac"
+      - "\\\\sum"
+      - "\\\\int"
+      - "\\$\\$.+\\$\\$"
+      - "\\$.+\\$"
     threshold: 3
 
-  # Signal 7: 表情符号异常
+  # Signal 7: 表情符号异常检测
   emoji_anomaly:
     threshold: 5
 
-  # Signal 8: 知识截止日期
+  # Signal 8: 知识截止日期声明检测
   knowledge_cutoff:
     phrases:
-      - As of my last knowledge update
-      - As of my training data
-      - 截至我的知识更新
-      - 根据我的训练数据
+      # === 英文短语 ===
+      # 训练数据相关
+      - "As of my last knowledge update"
+      - "As of my training data"
+      - "Based on my knowledge cutoff"
+      - "My training data only goes up to"
+      - "I don't have information after"
+      - "My knowledge is limited to"
+      - "My knowledge was last updated"
+      - "As of my last update"
+      - "Given my training data"
+      - "Based on my training"
+      - "I was trained until"
+      - "My training cutoff is"
+      - "As of my training"
+      - "The last information I have"
+      - "My knowledge ends at"
+      - "As of my last training"
+      - "My training ended in"
+      - "According to my training data"
+      - "From my training perspective"
+      - "My last knowledge was"
+      - "As of the time of my training"
+      - "I don't have up-to-date information"
+      - "I don't have access to real-time"
+      - "I cannot access current"
+      - "I'm unable to provide real-time"
+      - "My information might be outdated"
+      - "This information may have changed"
+      - "Please verify this information"
+      - "For the most current information"
+      - "For up-to-date information"
+      - "At the time of my training"
+      - "When I was last trained"
+      - "My training data includes"
+      - "My dataset was collected"
+      - "I was last updated"
+      - "My model was trained"
+      - "As an AI language model"
+      - "As an AI assistant"
+      - "As a large language model"
+      - "I'm an AI"
+      - "I am an artificial intelligence"
+      - "I'm a language model"
+      - "I don't have personal experiences"
+      - "I don't have feelings"
+      - "I cannot browse the internet"
+      - "I cannot access external"
+      - "I don't have the ability to"
+      # 模型版本引用
+      - "GPT-4"
+      - "GPT-3.5"
+      - "Claude 3"
+      - "Gemini Pro"
+      - "trained on data until"
+      - "knowledge cutoff"
+      - "training cutoff"
+      - "data cutoff"
+      # === 中文短语 ===
+      - "截至我的知识更新"
+      - "根据我的训练数据"
+      - "我的知识截止于"
+      - "基于我的知识"
+      - "据我所知"
+      - "我的训练数据只到"
+      - "我没有关于...的信息"
+      - "我的训练被截止于"
+      - "最后的信息我有的是"
+      - "根据我最后一次更新"
+      - "我的知识最后更新于"
+      - "按照我的训练"
+      - "我最后知道的是"
+      - "截至我被训练时"
+      - "基于我的训练数据"
+      - "从我训练的角度"
+      - "我没有最新信息"
+      - "我的知识库到"
+      - "我无法获取实时"
+      - "我无法访问当前"
+      - "我的信息可能已过时"
+      - "请核实此信息"
+      - "建议查阅最新资料"
+      - "以最新信息为准"
+      - "作为一个AI"
+      - "作为人工智能"
+      - "作为语言模型"
+      - "作为AI助手"
+      - "我是一个AI"
+      - "我是人工智能"
+      - "我没有个人经历"
+      - "我没有感情"
+      - "我无法浏览互联网"
+      - "我无法访问外部"
+      - "我没有能力"
+      - "我的数据集"
+      - "训练时"
+      - "截止日期"
+      - "知识截止"
 
-  # Signal 9: 协作式语气
+  # Signal 9: 协作式语气检测
   collaborative_tone:
     phrases:
-      - I hope this helps
-      - Let me know if
-      - Feel free to
-      - 希望这能帮到你
-      - 如果需要
-      - 随时告诉我
+      # === 英文协作式短语 ===
+      # 帮助类
+      - "I hope this helps"
+      - "Hope this helps"
+      - "Happy to help"
+      - "I'm here to help"
+      - "I'm glad to help"
+      - "I'd be happy to"
+      - "I'd be delighted to"
+      - "I'd be glad to"
+      - "I'm always happy to"
+      - "Glad I could help"
+      - "Pleased to assist"
+      - "At your service"
+      - "Here to assist"
+      # 联系类
+      - "Let me know if"
+      - "Feel free to"
+      - "Please let me know"
+      - "Don't hesitate to"
+      - "Feel free to reach out"
+      - "Feel free to ask"
+      - "Please reach out"
+      - "Feel free to contact"
+      - "Don't hesitate to ask"
+      - "Let me know if you need"
+      - "Let me know how I can help"
+      - "If you need further assistance"
+      - "If you need any clarification"
+      - "Please feel free to"
+      - "Should you have any questions"
+      - "If you have any questions"
+      - "For any questions"
+      - "For further questions"
+      - "If anything is unclear"
+      - "If you need more details"
+      # 礼貌/感谢类
+      - "I appreciate your question"
+      - "Thank you for your inquiry"
+      - "Thank you for asking"
+      - "Great question"
+      - "Good question"
+      - "That's a great question"
+      - "That's an interesting question"
+      - "Excellent question"
+      - "Thanks for reaching out"
+      - "Thank you for your patience"
+      - "I appreciate your interest"
+      # 建议类
+      - "Friendly reminder"
+      - "Just wanted to mention"
+      - "I wanted to point out"
+      - "I thought you might find"
+      - "It might be helpful to"
+      - "You might want to consider"
+      - "I'd suggest"
+      - "I'd recommend"
+      - "I would recommend"
+      - "I would suggest"
+      - "My suggestion would be"
+      - "My recommendation is"
+      - "You may want to"
+      - "Consider"
+      - "Perhaps you could"
+      - "One option would be"
+      - "Another approach would be"
+      # 确认类
+      - "Does that make sense"
+      - "Does this help"
+      - "Is there anything else"
+      - "Is that clear"
+      - "Let me know if this is helpful"
+      - "Did I answer your question"
+      - "Was this helpful"
+      # AI特有表达
+      - "I'll do my best to"
+      - "I'm not able to"
+      - "I cannot"
+      - "Unfortunately, I cannot"
+      - "I apologize, but"
+      - "I'm sorry, but"
+      - "Certainly!"
+      - "Absolutely!"
+      - "Of course!"
+      - "Sure thing!"
+      - "No problem!"
+      # === 中文协作式短语 ===
+      # 帮助类
+      - "希望这能帮到你"
+      - "希望对你有所帮助"
+      - "希望能够帮到您"
+      - "很高兴能够帮助"
+      - "我很乐意帮助"
+      - "我很乐意为你"
+      - "乐意效劳"
+      - "很高兴为您服务"
+      # 联系类
+      - "如果需要"
+      - "随时告诉我"
+      - "如有需要"
+      - "请随时联系"
+      - "如有问题"
+      - "欢迎随时咨询"
+      - "如有困惑"
+      - "请放心联系"
+      - "不要犹豫"
+      - "随时可以"
+      - "我在这里帮助你"
+      - "需要的话"
+      - "如果有任何帮助"
+      - "如需进一步"
+      - "更多细节"
+      - "有任何问题"
+      - "如有疑问"
+      - "随时提问"
+      - "欢迎追问"
+      - "如有不明白"
+      - "如需了解更多"
+      # 礼貌/感谢类
+      - "感谢您的提问"
+      - "感谢您的信任"
+      - "感谢您的耐心"
+      - "这是一个好问题"
+      - "这是个很好的问题"
+      - "问得好"
+      - "很高兴收到您的问题"
+      # 建议类
+      - "友情提示"
+      - "想提醒你"
+      - "建议你"
+      - "你可以考虑"
+      - "供您参考"
+      - "欢迎提出"
+      - "我的建议是"
+      - "建议您"
+      - "推荐您"
+      - "您可以尝试"
+      - "不妨试试"
+      - "或许可以"
+      # 确认类
+      - "这样解释清楚吗"
+      - "还有其他问题吗"
+      - "还需要了解什么"
+      - "这样可以吗"
+      - "希望这个回答对您有帮助"
+      # AI特有表达
+      - "我会尽力"
+      - "我无法"
+      - "很抱歉"
+      - "抱歉，我不能"
+      - "很遗憾"
+      - "当然可以"
+      - "没问题"
+      - "好的"
+      - "明白了"
     threshold: 3
 
-  # Signal 10: 完美主义陷阱
+  # Signal 10: 完美主义陷阱检测
   perfectionism:
     first_person_pronouns:
-      - I
-      - me
-      - my
-      - mine
-      - 我
-      - 我的
+      # === 英文 ===
+      - "I"
+      - "me"
+      - "my"
+      - "mine"
+      - "myself"
+      - "we"
+      - "us"
+      - "our"
+      - "ours"
+      - "ourselves"
+      - "I've"
+      - "I'm"
+      - "I'll"
+      - "I'd"
+      - "I was"
+      - "I had"
+      - "I have"
+      - "we've"
+      - "we're"
+      - "we'll"
+      - "we'd"
+      - "my experience"
+      - "my perspective"
+      - "my opinion"
+      - "my view"
+      - "my take"
+      - "my understanding"
+      - "my thoughts"
+      - "my feeling"
+      - "my belief"
+      - "in my case"
+      - "for me"
+      - "personally"
+      - "from my point of view"
+      - "as I see it"
+      - "the way I see it"
+      - "if you ask me"
+      - "speaking for myself"
+      - "in my experience"
+      - "from my perspective"
+      # === 中文 ===
+      - "我"
+      - "我的"
+      - "我们"
+      - "我们的"
+      - "本人"
+      - "我自己"
+      - "我们自己"
+      - "在我看来"
+      - "从我的角度"
+      - "我的经历"
+      - "我的经验"
+      - "我的看法"
+      - "我的观点"
+      - "我个人"
+      - "我本人"
+      - "就我而言"
+      - "对我来说"
+      - "依我看"
+      - "照我看"
+      - "我认为"
+      - "我觉得"
+      - "我想"
+      - "我以为"
+      - "我感觉"
+      - "我理解"
+      - "我记得"
+      - "我曾经"
+      - "我当时"
+      - "我那时"
+
     emotional_words:
-      - feel
-      - think
-      - believe
-      - hope
-      - 感觉
-      - 认为
-      - 相信
-      - 希望
+      # === 英文 ===
+      # 基本情感
+      - "feel"
+      - "think"
+      - "believe"
+      - "hope"
+      - "love"
+      - "hate"
+      - "like"
+      - "dislike"
+      - "want"
+      - "need"
+      - "wish"
+      - "desire"
+      # 担忧/恐惧
+      - "worry"
+      - "afraid"
+      - "scared"
+      - "fear"
+      - "dread"
+      - "anxious"
+      - "nervous"
+      - "terrified"
+      - "uneasy"
+      - "apprehensive"
+      # 快乐/兴奋
+      - "excited"
+      - "happy"
+      - "glad"
+      - "pleased"
+      - "delighted"
+      - "thrilled"
+      - "ecstatic"
+      - "joyful"
+      - "elated"
+      - "overjoyed"
+      # 悲伤/失望
+      - "sad"
+      - "disappointed"
+      - "upset"
+      - "depressed"
+      - "heartbroken"
+      - "devastated"
+      - "miserable"
+      - "gloomy"
+      - "melancholy"
+      # 愤怒/烦躁
+      - "angry"
+      - "frustrated"
+      - "annoyed"
+      - "irritated"
+      - "furious"
+      - "outraged"
+      - "mad"
+      - "pissed"
+      - "fed up"
+      # 困惑/惊讶
+      - "confused"
+      - "surprised"
+      - "shocked"
+      - "amazed"
+      - "astonished"
+      - "bewildered"
+      - "puzzled"
+      - "baffled"
+      - "stunned"
+      # 其他情感
+      - "concerned"
+      - "passionate"
+      - "skeptical"
+      - "dubious"
+      - "appreciate"
+      - "resent"
+      - "regret"
+      - "cherish"
+      - "envy"
+      - "admire"
+      - "prefer"
+      - "despise"
+      - "loathe"
+      - "adore"
+      - "treasure"
+      - "value"
+      - "miss"
+      - "long for"
+      - "yearn"
+      - "crave"
+      - "embarrassed"
+      - "ashamed"
+      - "proud"
+      - "guilty"
+      - "relieved"
+      - "grateful"
+      - "thankful"
+      - "touched"
+      - "moved"
+      - "inspired"
+      - "bored"
+      - "tired"
+      - "exhausted"
+      - "overwhelmed"
+      - "stressed"
+      # === 中文 ===
+      - "感觉"
+      - "认为"
+      - "相信"
+      - "希望"
+      - "喜欢"
+      - "讨厌"
+      - "想要"
+      - "需要"
+      - "渴望"
+      - "担心"
+      - "害怕"
+      - "恐惧"
+      - "紧张"
+      - "不安"
+      - "焦虑"
+      - "高兴"
+      - "开心"
+      - "快乐"
+      - "兴奋"
+      - "激动"
+      - "欣慰"
+      - "满足"
+      - "悲伤"
+      - "难过"
+      - "伤心"
+      - "失望"
+      - "沮丧"
+      - "郁闷"
+      - "消沉"
+      - "生气"
+      - "愤怒"
+      - "烦躁"
+      - "恼火"
+      - "气愤"
+      - "困惑"
+      - "迷茫"
+      - "惊讶"
+      - "惊喜"
+      - "震惊"
+      - "吃惊"
+      - "觉得"
+      - "以为"
+      - "热爱"
+      - "喜爱"
+      - "厌恶"
+      - "反感"
+      - "珍惜"
+      - "嫉妒"
+      - "羡慕"
+      - "敬佩"
+      - "佩服"
+      - "羞愧"
+      - "惭愧"
+      - "尴尬"
+      - "遗憾"
+      - "后悔"
+      - "懊悔"
+      - "热情"
+      - "冷淡"
+      - "怀疑"
+      - "信任"
+      - "感激"
+      - "感谢"
+      - "感动"
+      - "骄傲"
+      - "自豪"
+      - "内疚"
+      - "释然"
+      - "无聊"
+      - "厌倦"
+      - "疲惫"
+      - "累"
+      - "压力大"
+
     uncertainty_markers:
-      - might
-      - maybe
-      - perhaps
-      - possibly
-      - 可能
-      - 也许
-      - 或许
+      # === 英文 ===
+      # 可能性词
+      - "might"
+      - "maybe"
+      - "perhaps"
+      - "possibly"
+      - "probably"
+      - "likely"
+      - "unlikely"
+      - "could"
+      - "would"
+      - "should"
+      - "may"
+      # 猜测/推测
+      - "I guess"
+      - "I suppose"
+      - "I reckon"
+      - "I assume"
+      - "I presume"
+      - "I think"
+      - "I believe"
+      - "I suspect"
+      - "I imagine"
+      - "I figure"
+      # 不确定表达
+      - "I'm not sure"
+      - "I'm uncertain"
+      - "I don't know"
+      - "I'm not certain"
+      - "not entirely sure"
+      - "not quite sure"
+      - "I could be wrong"
+      - "I may be mistaken"
+      - "correct me if I'm wrong"
+      - "don't quote me on this"
+      - "take this with a grain of salt"
+      # 程度词
+      - "somewhat"
+      - "kind of"
+      - "sort of"
+      - "a bit"
+      - "a little"
+      - "slightly"
+      - "rather"
+      - "fairly"
+      - "pretty much"
+      - "more or less"
+      - "roughly"
+      - "approximately"
+      - "around"
+      - "about"
+      # 表象词
+      - "seems like"
+      - "seems to"
+      - "appears to"
+      - "looks like"
+      - "sounds like"
+      - "feels like"
+      - "it seems"
+      - "it appears"
+      - "apparently"
+      - "seemingly"
+      # 观点限定
+      - "in my opinion"
+      - "in my view"
+      - "from my perspective"
+      - "as far as I know"
+      - "as far as I can tell"
+      - "to my knowledge"
+      - "if I recall"
+      - "if I remember correctly"
+      - "as I understand it"
+      - "based on my understanding"
+      # 其他
+      - "supposedly"
+      - "allegedly"
+      - "reportedly"
+      - "arguably"
+      - "conceivably"
+      - "hypothetically"
+      - "theoretically"
+      - "in theory"
+      - "potentially"
+      - "essentially"
+      - "basically"
+      - "generally"
+      - "usually"
+      - "typically"
+      - "often"
+      - "sometimes"
+      - "occasionally"
+      - "rarely"
+      - "seldom"
+      # === 中文 ===
+      - "可能"
+      - "也许"
+      - "或许"
+      - "大概"
+      - "大约"
+      - "差不多"
+      - "左右"
+      - "上下"
+      - "不一定"
+      - "未必"
+      - "不太确定"
+      - "不太清楚"
+      - "不太了解"
+      - "我想"
+      - "我猜"
+      - "我估计"
+      - "我推测"
+      - "我觉得"
+      - "我以为"
+      - "好像"
+      - "似乎"
+      - "仿佛"
+      - "貌似"
+      - "看起来"
+      - "听起来"
+      - "感觉像"
+      - "有点"
+      - "有些"
+      - "稍微"
+      - "略微"
+      - "比较"
+      - "相当"
+      - "某种程度上"
+      - "在一定程度上"
+      - "在我看来"
+      - "就我所知"
+      - "据我了解"
+      - "我记得好像"
+      - "如果我没记错"
+      - "我可能错了"
+      - "我可能弄反了"
+      - "不完全确定"
+      - "我不太确定"
+      - "听说"
+      - "据说"
+      - "传说"
+      - "好像是"
+      - "倒可能"
+      - "恐怕"
+      - "怕是"
+      - "说起来"
+      - "要不是"
+      - "假如"
+      - "倘若"
+      - "如果"
+      - "万一"
+      - "理论上"
+      - "按理说"
+      - "一般来说"
+      - "通常"
+      - "往往"
+      - "经常"
+      - "有时"
+      - "偶尔"
+      - "很少"
+      - "几乎不"
     threshold: 5
 
-# 评分配置
+# 评分权重配置 (总分100分)
+# 风险等级: 0-40极高 | 41-60高 | 61-75中等 | 76-100低
 scoring:
   weights:
-    vocabulary_diversity: 20.0    # 词汇多样性
-    sentence_complexity: 15.0     # 句式复杂度
-    personalization: 25.0         # 个人化表达
-    logical_coherence: 20.0       # 逻辑连贯性
-    emotional_authenticity: 20.0  # 情感真实度
+    vocabulary_diversity: 20.0      # 词汇多样性
+    sentence_complexity: 15.0       # 句式复杂度
+    personalization: 25.0           # 个人化表达（最重要）
+    logical_coherence: 20.0         # 逻辑连贯性
+    emotional_authenticity: 20.0    # 情感真实度
 
 # 输出配置
 output:
-  default_format: text  # 默认输出格式: text, json
-  language: zh          # 语言: zh, en
-  verbose: false        # 详细输出
-  color_enabled: true   # 启用颜色输出
+  default_format: text  # text|json|html
+  language: zh          # zh|en
+  verbose: false
+  color_enabled: true
 
-# 规则配置
+# 规则配置 (severity: critical > high > medium > low)
 rules:
   high_frequency_words:
     enabled: true
     threshold: 3
     severity: high
-
   sentence_starters:
     enabled: true
     threshold: 5
     severity: high
-
   false_range:
     enabled: true
     threshold: 2
     severity: medium
-
   citation_anomaly:
     enabled: true
     threshold: 1
     severity: critical
-
   em_dash_density:
     enabled: true
     threshold: 5
     severity: medium
-
   markdown_residue:
     enabled: true
     threshold: 3
     severity: high
-
   emoji_anomaly:
     enabled: true
     threshold: 5
     severity: medium
-
   knowledge_cutoff:
     enabled: true
     threshold: 1
     severity: critical
-
   collaborative_tone:
     enabled: true
     threshold: 3
     severity: high
-
   perfectionism:
     enabled: true
     threshold: 5
     severity: high
+
+# Gemini API配置
+gemini:
+  api_key: ""  # 或通过环境变量 GEMINI_API_KEY 设置
+  model: "gemini-2.0-flash-exp"
+  timeout: "30s"
+  max_retries: 3
+  retry_delay: 2
+  rate_limit: 60
+  enabled: false
+  analysis_options:
+    semantic_analysis: true
+    rewrite_suggestions: true
+    emotion_analysis: true
+    personalization_assessment: true
+
+# 多模态配置
+multimodal:
+  image:
+    enabled: false
+    supported_formats: [jpg, jpeg, png, gif, webp]
+    max_file_size: 10485760  # 10MB
+    threshold: 0.7
+  audio:
+    enabled: false
+    max_file_size: 104857600  # 100MB
+    supported_formats: [mp3, wav, m4a]
+  video:
+    enabled: false
+    max_file_size: 524288000  # 500MB
+    supported_formats: [mp4, avi, mov]
+
+# 性能配置
+performance:
+  max_concurrent: 5
+  max_text_length: 50000
+  cache:
+    enabled: true
+    ttl: 3600
+    max_entries: 1000
+    storage: memory  # memory|redis|file
+  chunking:
+    enabled: true
+    chunk_size: 10000
+    overlap: 500
+
+# 日志配置
+logging:
+  level: info  # debug|info|warn|error|fatal
+  format: text  # text|json
+  output: stdout  # stdout|stderr|file
+  file_path: "./logs/aigc-check.log"
+  rotation_enabled: false
+  rotation:
+    max_size: 100
+    max_backups: 10
+    max_age: 30
+    compress: true
+
+# 数据库配置
+database:
+  type: sqlite  # sqlite|postgresql
+  sqlite:
+    path: "./data/aigc-check.db"
+    wal_enabled: true
+  postgresql:
+    host: "localhost"
+    port: 5432
+    user: ""
+    password: ""
+    database: ""
+    ssl_mode: "disable"
+  pool:
+    max_connections: 10
+    min_connections: 2
+    max_idle_time: 300
+    max_lifetime: 3600
+
+# Web API配置
+web:
+  listen_address: "0.0.0.0:8080"
+  https_enabled: false
+  tls:
+    cert_file: ""
+    key_file: ""
+  read_timeout: 30
+  write_timeout: 30
+  idle_timeout: 120
+  cors:
+    enabled: true
+    allowed_origins: ["*"]
+    allowed_methods: [GET, POST, OPTIONS]
+    allowed_headers: [Content-Type, Authorization, X-API-Key]
+    allow_credentials: false
+    max_age: 86400
+  auth_required: false
+  auth:
+    api_keys: [""]
+    token_expiration: 86400
+
+# 版本信息
+version_control:
+  config_version: "1.0.0"
+  created_at: "2026-01-29"
+  updated_at: "2026-01-29"

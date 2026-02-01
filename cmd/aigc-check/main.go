@@ -12,17 +12,35 @@ import (
 	"github.com/leoobai/aigc-check/internal/reporter"
 )
 
-const version = "0.1.0"
+const version = "2.0.0"
+
+// runOptions 运行选项
+type runOptions struct {
+	inputFile        string
+	outputFile       string
+	format           string
+	configFile       string
+	enableMultimodal bool
+	enableStatistics bool
+	enableGemini     bool
+	geminiAPIKey     string
+	verbose          bool
+}
 
 func main() {
 	// 定义命令行参数
 	var (
-		inputFile  string
-		outputFile string
-		format     string
-		configFile string
-		showHelp   bool
-		showVer    bool
+		inputFile       string
+		outputFile      string
+		format          string
+		configFile      string
+		showHelp        bool
+		showVer         bool
+		enableMultimodal bool
+		enableStatistics bool
+		enableGemini    bool
+		geminiAPIKey    string
+		verbose         bool
 	)
 
 	flag.StringVar(&inputFile, "f", "", "输入文件路径")
@@ -36,6 +54,16 @@ func main() {
 	flag.BoolVar(&showHelp, "help", false, "显示帮助信息")
 	flag.BoolVar(&showVer, "v", false, "显示版本信息")
 	flag.BoolVar(&showVer, "version", false, "显示版本信息")
+
+	// 多模态检测参数
+	flag.BoolVar(&enableMultimodal, "m", false, "启用多模态检测")
+	flag.BoolVar(&enableMultimodal, "multimodal", false, "启用多模态检测")
+	flag.BoolVar(&enableStatistics, "s", false, "启用统计分析层")
+	flag.BoolVar(&enableStatistics, "statistics", false, "启用统计分析层")
+	flag.BoolVar(&enableGemini, "g", false, "启用 Gemini API 语义分析")
+	flag.BoolVar(&enableGemini, "gemini", false, "启用 Gemini API 语义分析")
+	flag.StringVar(&geminiAPIKey, "api-key", "", "Gemini API Key（也可通过环境变量 GEMINI_API_KEY 设置）")
+	flag.BoolVar(&verbose, "verbose", false, "显示详细分析结果")
 
 	flag.Parse()
 
@@ -59,20 +87,31 @@ func main() {
 	}
 
 	// 运行检测
-	if err := run(inputFile, outputFile, format, configFile); err != nil {
+	opts := runOptions{
+		inputFile:        inputFile,
+		outputFile:       outputFile,
+		format:           format,
+		configFile:       configFile,
+		enableMultimodal: enableMultimodal,
+		enableStatistics: enableStatistics,
+		enableGemini:     enableGemini,
+		geminiAPIKey:     geminiAPIKey,
+		verbose:          verbose,
+	}
+	if err := run(opts); err != nil {
 		fmt.Fprintf(os.Stderr, "错误: %v\n", err)
 		os.Exit(1)
 	}
 }
 
 // run 执行检测流程
-func run(inputFile, outputFile, format, configFile string) error {
+func run(opts runOptions) error {
 	// 加载配置
 	var cfg *config.Config
 	var err error
 
-	if configFile != "" {
-		cfg, err = config.LoadConfig(configFile)
+	if opts.configFile != "" {
+		cfg, err = config.LoadConfig(opts.configFile)
 		if err != nil {
 			return fmt.Errorf("加载配置文件失败: %w", err)
 		}
@@ -88,12 +127,30 @@ func run(inputFile, outputFile, format, configFile string) error {
 	}
 
 	// 如果命令行指定了格式，覆盖配置
-	if format != "" {
-		cfg.Output.DefaultFormat = format
+	if opts.format != "" {
+		cfg.Output.DefaultFormat = opts.format
+	}
+
+	// 应用多模态检测配置
+	if opts.enableMultimodal {
+		cfg.Multimodal.Enabled = true
+	}
+	if opts.enableStatistics {
+		cfg.Multimodal.EnableStatistics = true
+	}
+	if opts.enableGemini {
+		cfg.Multimodal.EnableSemantic = true
+		cfg.Gemini.Enabled = true
+	}
+	if opts.geminiAPIKey != "" {
+		cfg.Gemini.APIKey = opts.geminiAPIKey
+	}
+	if opts.verbose {
+		cfg.Output.Verbose = true
 	}
 
 	// 读取输入文件
-	content, err := os.ReadFile(inputFile)
+	content, err := os.ReadFile(opts.inputFile)
 	if err != nil {
 		return fmt.Errorf("读取输入文件失败: %w", err)
 	}
@@ -137,12 +194,12 @@ func run(inputFile, outputFile, format, configFile string) error {
 	}
 
 	// 输出报告
-	if outputFile != "" {
+	if opts.outputFile != "" {
 		// 写入文件
-		if err := os.WriteFile(outputFile, []byte(report), 0644); err != nil {
+		if err := os.WriteFile(opts.outputFile, []byte(report), 0644); err != nil {
 			return fmt.Errorf("写入输出文件失败: %w", err)
 		}
-		fmt.Printf("报告已保存到: %s\n", outputFile)
+		fmt.Printf("报告已保存到: %s\n", opts.outputFile)
 	} else {
 		// 输出到标准输出
 		fmt.Println(report)
@@ -166,6 +223,13 @@ func printHelp() {
 	fmt.Println("  -h, --help             显示帮助信息")
 	fmt.Println("  -v, --version          显示版本信息")
 	fmt.Println()
+	fmt.Println("多模态检测选项:")
+	fmt.Println("  -m, --multimodal       启用多模态检测（默认: false）")
+	fmt.Println("  -s, --statistics       启用统计分析层（默认: false）")
+	fmt.Println("  -g, --gemini           启用 Gemini API 语义分析（默认: false）")
+	fmt.Println("  --api-key <key>        Gemini API Key（也可通过环境变量 GEMINI_API_KEY 设置）")
+	fmt.Println("  --verbose              显示详细分析结果（默认: false）")
+	fmt.Println()
 	fmt.Println("示例:")
 	fmt.Println("  # 检测文本文件")
 	fmt.Println("  aigc-check -f sample.txt")
@@ -178,5 +242,17 @@ func printHelp() {
 	fmt.Println()
 	fmt.Println("  # 使用自定义配置")
 	fmt.Println("  aigc-check -f sample.txt -c custom-config.yaml")
+	fmt.Println()
+	fmt.Println("  # 启用多模态检测")
+	fmt.Println("  aigc-check -f sample.txt -m")
+	fmt.Println()
+	fmt.Println("  # 启用统计分析层")
+	fmt.Println("  aigc-check -f sample.txt -m -s")
+	fmt.Println()
+	fmt.Println("  # 启用完整多模态检测（包括 Gemini API）")
+	fmt.Println("  aigc-check -f sample.txt -m -s -g --api-key YOUR_API_KEY")
+	fmt.Println()
+	fmt.Println("  # 显示详细分析结果")
+	fmt.Println("  aigc-check -f sample.txt -m --verbose")
 	fmt.Println()
 }

@@ -1,22 +1,30 @@
 package analyzer
 
 import (
+	"context"
+	"fmt"
 	"time"
 
 	"github.com/leoobai/aigc-check/internal/config"
 	"github.com/leoobai/aigc-check/internal/detector"
+	"github.com/leoobai/aigc-check/internal/gemini"
 	"github.com/leoobai/aigc-check/internal/models"
 	"github.com/leoobai/aigc-check/internal/rules"
 	"github.com/leoobai/aigc-check/internal/scorer"
+	"github.com/leoobai/aigc-check/internal/statistics"
 	"github.com/leoobai/aigc-check/internal/text"
 )
 
 // Analyzer 主分析器
 type Analyzer struct {
-	config     *config.Config
-	ruleEngine *detector.RuleEngine
-	scorer     *scorer.Calculator
-	processor  *text.TextProcessor
+	config           *config.Config
+	ruleEngine       *detector.RuleEngine
+	scorer           *scorer.Calculator
+	processor        *text.TextProcessor
+	statsAnalyzer    *statistics.Analyzer
+	geminiAnalyzer   *gemini.Analyzer
+	geminiSuggester  *gemini.Suggester
+	multimodalConfig models.MultimodalConfig
 }
 
 // NewAnalyzer 创建分析器
@@ -36,18 +44,53 @@ func NewAnalyzer(cfg *config.Config) *Analyzer {
 	ruleEngine.RegisterRule(rules.NewCollaborativeRule(cfg))
 	ruleEngine.RegisterRule(rules.NewPerfectionismRule(cfg))
 
+	// 创建统计分析器
+	statsAnalyzer := statistics.NewAnalyzer()
+
+	// 创建 Gemini 分析器和建议器（如果启用）
+	var geminiAnalyzer *gemini.Analyzer
+	var geminiSuggester *gemini.Suggester
+	if cfg.Gemini.Enabled {
+		client, err := gemini.NewClient(cfg.Gemini)
+		if err == nil {
+			geminiAnalyzer = gemini.NewAnalyzer(client)
+			geminiSuggester = gemini.NewSuggester(client)
+		}
+	}
+
+	// 多模态配置
+	multimodalConfig := models.DefaultMultimodalConfig
+	multimodalConfig.EnableStatistics = true
+	multimodalConfig.EnableSemantic = cfg.Gemini.Enabled
+
 	return &Analyzer{
-		config:     cfg,
-		ruleEngine: ruleEngine,
-		scorer:     scorer.NewCalculator(cfg),
-		processor:  text.NewTextProcessor(),
+		config:           cfg,
+		ruleEngine:       ruleEngine,
+		scorer:           scorer.NewCalculator(cfg),
+		processor:        text.NewTextProcessor(),
+		statsAnalyzer:    statsAnalyzer,
+		geminiAnalyzer:   geminiAnalyzer,
+		geminiSuggester:  geminiSuggester,
+		multimodalConfig: multimodalConfig,
 	}
 }
 
-// Analyze 执行完整分析
+// Analyze 执行完整分析（支持多模态检测）
 func (a *Analyzer) Analyze(request models.DetectionRequest) (*models.DetectionResult, error) {
 	startTime := time.Now()
+	ctx := context.Background()
 
+	// 如果启用多模态检测，使用多层分析
+	if a.multimodalConfig.Enabled {
+		return a.analyzeMultimodal(ctx, request, startTime)
+	}
+
+	// 否则使用传统单层检测
+	return a.analyzeSingleLayer(request, startTime)
+}
+
+// analyzeSingleLayer 单层检测（传统模式）
+func (a *Analyzer) analyzeSingleLayer(request models.DetectionRequest, startTime time.Time) (*models.DetectionResult, error) {
 	// 执行规则检测
 	ruleResults := a.ruleEngine.Check(request.Text)
 
@@ -183,7 +226,284 @@ func (a *Analyzer) generateSuggestions(results []models.RuleResult) []models.Sug
 	return suggestions
 }
 
+// analyzeMultimodal 多模态检测（分层触发策略）
+func (a *Analyzer) analyzeMultimodal(ctx context.Context, request models.DetectionRequest, startTime time.Time) (*models.DetectionResult, error) {
+	// Layer 1: 规则检测
+	ruleResults := a.ruleEngine.Check(request.Text)
+	ruleScore := a.scorer.Calculate(ruleResults)
+	ruleConfidence := a.calculateRuleConfidence(ruleResults, ruleScore)
+
+	// 初始化多模态结果
+	multimodal := &models.MultimodalResult{
+		RuleLayerScore: ruleScore.Total,
+		LayerWeights:   a.multimodalConfig.GetEffectiveWeights(),
+		DetectionMode:  a.multimodalConfig.GetDetectionMode(),
+		RuleLayerDetails: &models.RuleLayerDetails{
+			DetectedRulesCount: countDetectedRules(ruleResults),
+			TotalRulesCount:    len(ruleResults),
+			RedFlagCount:       countRedFlags(ruleResults),
+			MainIssues:         extractMainIssues(ruleResults),
+		},
+	}
+
+	return a.continueMultimodalAnalysis(ctx, request, ruleResults, ruleScore, ruleConfidence, multimodal, startTime)
+}
+
+// continueMultimodalAnalysis 继续多模态分析
+func (a *Analyzer) continueMultimodalAnalysis(
+	ctx context.Context,
+	request models.DetectionRequest,
+	ruleResults []models.RuleResult,
+	ruleScore models.Score,
+	ruleConfidence float64,
+	multimodal *models.MultimodalResult,
+	startTime time.Time,
+) (*models.DetectionResult, error) {
+	thresholds := a.multimodalConfig.ConfidenceThresholds
+
+	// 判断是否需要统计分析
+	if a.multimodalConfig.EnableStatistics && models.NeedsStatisticsAnalysis(ruleConfidence, thresholds) {
+		statsResult := a.statsAnalyzer.Analyze(request.Text)
+		multimodal.StatisticsLayerScore = statsResult.HumanScore
+		multimodal.StatisticsLayerDetails = &models.StatisticsLayerDetails{
+			TypeTokenRatio:         statsResult.Vocabulary.TTR,
+			VocabularyRichness:     statsResult.Vocabulary.Richness,
+			SentenceLengthVariance: statsResult.Sentence.LengthStdDev,
+			SentenceComplexity:     statsResult.Sentence.ComplexityScore,
+			PerplexityScore:        statsResult.Perplexity.Score,
+			AIProbability:          statsResult.AIProbability,
+			Details:                statsResult.Details,
+		}
+	}
+
+	return a.finalizeMultimodalResult(ctx, request, ruleResults, ruleScore, ruleConfidence, multimodal, startTime)
+}
+
+// finalizeMultimodalResult 完成多模态分析并生成最终结果
+func (a *Analyzer) finalizeMultimodalResult(
+	ctx context.Context,
+	request models.DetectionRequest,
+	ruleResults []models.RuleResult,
+	ruleScore models.Score,
+	ruleConfidence float64,
+	multimodal *models.MultimodalResult,
+	startTime time.Time,
+) (*models.DetectionResult, error) {
+	statsConfidence := ruleConfidence
+	if multimodal.StatisticsLayerDetails != nil {
+		statsConfidence = 1.0 - multimodal.StatisticsLayerDetails.AIProbability
+	}
+
+	thresholds := a.multimodalConfig.ConfidenceThresholds
+
+	// 判断是否需要语义分析
+	if a.multimodalConfig.EnableSemantic && a.geminiAnalyzer != nil &&
+		models.NeedsSemanticAnalysis(ruleConfidence, statsConfidence, thresholds) {
+		// 调用 Gemini 进行语义分析
+		analysisResult, err := a.geminiAnalyzer.AnalyzeText(ctx, request.Text)
+		if err == nil {
+			// 将 AI 概率转换为人类分数 (100 - AI概率)
+			humanScore := 100.0 - analysisResult.AIProbability
+			multimodal.SemanticLayerScore = humanScore
+
+			// 提取特征名称
+			features := make([]string, len(analysisResult.Features))
+			for i, f := range analysisResult.Features {
+				features[i] = f.Name
+			}
+
+			multimodal.SemanticLayerDetails = &models.SemanticLayerDetails{
+				CoherenceScore:       50.0, // 默认值，可以通过单独调用获取
+				PersonalizationScore: 50.0, // 默认值
+				AIPatternScore:       analysisResult.AIProbability,
+				DetectedFeatures:     features,
+				Explanation:          analysisResult.Explanation,
+				FromCache:            false,
+			}
+		}
+	}
+
+	// 融合分数
+	weights := multimodal.LayerWeights
+	multimodal.FinalScore = models.FuseScores(
+		multimodal.RuleLayerScore,
+		multimodal.StatisticsLayerScore,
+		multimodal.SemanticLayerScore,
+		weights,
+	)
+
+	// 计算融合置信度
+	semanticConf := 0.5
+	if multimodal.SemanticLayerDetails != nil {
+		semanticConf = 1.0 - (multimodal.SemanticLayerDetails.AIPatternScore / 100.0)
+	}
+	multimodal.Confidence = models.CalculateFusionConfidence(ruleConfidence, statsConfidence, semanticConf, weights)
+
+	// 生成融合说明
+	multimodal.FusionExplanation = a.generateFusionExplanation(multimodal)
+
+	// 生成建议
+	suggestions := a.generateSuggestions(ruleResults)
+
+	// 如果启用了智能建议，添加 Gemini 建议
+	if a.geminiSuggester != nil && multimodal.SemanticLayerDetails != nil {
+		issues := extractIssuesFromResults(ruleResults)
+		geminiSuggestions, err := a.geminiSuggester.GenerateSuggestions(ctx, request.Text, issues)
+		if err == nil {
+			suggestions = append(suggestions, convertGeminiSuggestions(geminiSuggestions)...)
+		}
+	}
+
+	// 构建最终结果
+	result := &models.DetectionResult{
+		RequestID:   generateRequestID(),
+		Text:        request.Text,
+		Score:       models.Score{Total: multimodal.FinalScore, Dimensions: ruleScore.Dimensions},
+		RuleResults: ruleResults,
+		Suggestions: suggestions,
+		RiskLevel:   models.GetRiskLevel(multimodal.FinalScore),
+		ProcessTime: time.Since(startTime),
+		DetectedAt:  time.Now(),
+	}
+
+	return result, nil
+}
+
+// calculateRuleConfidence 计算规则检测置信度
+func (a *Analyzer) calculateRuleConfidence(results []models.RuleResult, score models.Score) float64 {
+	detectedCount := countDetectedRules(results)
+	redFlagCount := countRedFlags(results)
+
+	// 基础置信度基于分数
+	baseConfidence := score.Total / 100.0
+
+	// 红旗规则增加置信度
+	if redFlagCount > 0 {
+		baseConfidence += float64(redFlagCount) * 0.1
+	}
+
+	// 检测到的规则数量影响置信度
+	if detectedCount >= 5 {
+		baseConfidence += 0.15
+	} else if detectedCount >= 3 {
+		baseConfidence += 0.10
+	}
+
+	// 确保在 0-1 范围内
+	if baseConfidence > 1.0 {
+		return 1.0
+	}
+	if baseConfidence < 0.0 {
+		return 0.0
+	}
+
+	return baseConfidence
+}
+
+// countDetectedRules 统计检测到的规则数量
+func countDetectedRules(results []models.RuleResult) int {
+	count := 0
+	for _, r := range results {
+		if r.Detected {
+			count++
+		}
+	}
+	return count
+}
+
+// countRedFlags 统计红旗规则数量
+func countRedFlags(results []models.RuleResult) int {
+	count := 0
+	redFlagTypes := map[models.RuleType]bool{
+		models.RuleTypeCitationAnomaly:  true,
+		models.RuleTypeKnowledgeCutoff:  true,
+		models.RuleTypeMarkdown:         true,
+		models.RuleTypeEmoji:            true,
+	}
+
+	for _, r := range results {
+		if r.Detected && redFlagTypes[r.RuleType] {
+			count++
+		}
+	}
+	return count
+}
+
+// extractMainIssues 提取主要问题
+func extractMainIssues(results []models.RuleResult) []string {
+	var issues []string
+	for _, r := range results {
+		if r.Detected {
+			issues = append(issues, string(r.RuleType))
+		}
+	}
+	return issues
+}
+
+// generateFusionExplanation 生成融合说明
+func (a *Analyzer) generateFusionExplanation(multimodal *models.MultimodalResult) string {
+	mode := multimodal.DetectionMode
+
+	switch mode {
+	case models.DetectionModeRuleOnly:
+		return "仅使用规则检测"
+	case models.DetectionModeRuleStatistics:
+		return fmt.Sprintf("规则检测(%.1f) + 统计分析(%.1f) 融合",
+			multimodal.RuleLayerScore, multimodal.StatisticsLayerScore)
+	case models.DetectionModeMultimodal:
+		return fmt.Sprintf("规则检测(%.1f) + 统计分析(%.1f) + 语义分析(%.1f) 融合",
+			multimodal.RuleLayerScore, multimodal.StatisticsLayerScore, multimodal.SemanticLayerScore)
+	default:
+		return "未知检测模式"
+	}
+}
+
+// extractIssuesFromResults 从规则结果中提取问题描述
+func extractIssuesFromResults(results []models.RuleResult) []string {
+	var issues []string
+	for _, r := range results {
+		if r.Detected {
+			issues = append(issues, r.Message)
+		}
+	}
+	return issues
+}
+
+// convertGeminiSuggestions 转换 Gemini 建议为标准建议格式
+func convertGeminiSuggestions(geminiSuggestions []gemini.Suggestion) []models.Suggestion {
+	suggestions := make([]models.Suggestion, 0, len(geminiSuggestions))
+	for _, gs := range geminiSuggestions {
+		// 根据优先级映射
+		priority := models.PriorityMedium
+		if gs.Priority <= 2 {
+			priority = models.PriorityHigh
+		} else if gs.Priority >= 4 {
+			priority = models.PriorityLow
+		}
+
+		suggestion := models.NewSuggestion(
+			models.CategoryAuthenticity,
+			priority,
+			gs.Title,
+			gs.Description,
+			"", // 不关联特定规则
+		)
+
+		// 如果有原文和建议文本，添加为示例
+		if gs.OriginalText != "" && gs.SuggestedText != "" {
+			suggestion.AddExample(gs.OriginalText, gs.SuggestedText, gs.Reason)
+		}
+
+		suggestions = append(suggestions, suggestion)
+	}
+	return suggestions
+}
+
 // generateRequestID 生成请求ID
 func generateRequestID() string {
-	return time.Now().Format("20060102150405")
+	// 使用时间戳（到微秒）+ 随机数确保唯一性
+	now := time.Now()
+	timestamp := now.Format("20060102150405")
+	microsecond := now.Nanosecond() / 1000
+	return fmt.Sprintf("%s%06d", timestamp, microsecond)
 }

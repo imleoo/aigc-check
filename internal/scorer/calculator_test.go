@@ -173,8 +173,41 @@ func TestCalculator_CalculateTotalWithRedFlags(t *testing.T) {
 		}
 	})
 
-	// 测试双重红旗
+	// 测试双重红旗 - 使用乘法递减机制
 	t.Run("双重红旗", func(t *testing.T) {
+		dimensions := models.DimensionScores{
+			VocabularyDiversity:   models.DimensionScore{Score: 20},
+			SentenceComplexity:    models.DimensionScore{Score: 15},
+			Personalization:       models.DimensionScore{Score: 25},
+			LogicalCoherence:      models.DimensionScore{Score: 20},
+			EmotionalAuthenticity: models.DimensionScore{Score: 20},
+		}
+
+		results := []models.RuleResult{
+			{
+				RuleType: models.RuleTypeKnowledgeCutoff,
+				Detected: true,
+				Score:    0.0, // 最严重
+			},
+			{
+				RuleType: models.RuleTypeCitationAnomaly,
+				Detected: true,
+				Score:    0.0, // 最严重
+			},
+		}
+
+		total := calc.CalculateTotalWithRedFlags(dimensions, results)
+
+		// 使用乘法递减: 100 * 0.5 * 0.5 = 25
+		// 而非之前的减法: 100 - 50 - 50 = 0
+		// 期望分数在20-30之间（有最低保底分数5分）
+		if total < 20 || total > 35 {
+			t.Errorf("Total = %.1f, expected between 20-35 for double red flags with multiplicative penalty", total)
+		}
+	})
+
+	// 测试三重红旗（包含Markdown）
+	t.Run("三重红旗", func(t *testing.T) {
 		dimensions := models.DimensionScores{
 			VocabularyDiversity:   models.DimensionScore{Score: 20},
 			SentenceComplexity:    models.DimensionScore{Score: 15},
@@ -194,13 +227,21 @@ func TestCalculator_CalculateTotalWithRedFlags(t *testing.T) {
 				Detected: true,
 				Score:    0.0,
 			},
+			{
+				RuleType: models.RuleTypeMarkdown,
+				Detected: true,
+				Score:    20.0, // 严重的Markdown问题
+			},
 		}
 
 		total := calc.CalculateTotalWithRedFlags(dimensions, results)
 
-		// 双重红旗应该是0分（扣100分）
-		if total > 5 {
-			t.Errorf("Total = %.1f, expected very low score for double red flags", total)
+		// 100 * 0.5 * 0.5 * 0.84 ≈ 21，应该大于最低保底分数
+		if total < MinimumScore {
+			t.Errorf("Total = %.1f, should be at least minimum score %.1f", total, MinimumScore)
+		}
+		if total > 25 {
+			t.Errorf("Total = %.1f, expected lower score for triple red flags", total)
 		}
 	})
 }

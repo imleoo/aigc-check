@@ -121,13 +121,17 @@ func (r *HighFreqWordsRule) GetDescription() string {
 func (r *HighFreqWordsRule) getContext(text string, offset, length int) string {
 	const contextSize = 50 // 前后各50个字符
 
+	// 将字节偏移量转换为 rune 索引
 	runes := []rune(text)
-	start := offset - contextSize
+	runeOffset := len([]rune(text[:offset]))
+	runeLength := len([]rune(text[offset : offset+length]))
+
+	start := runeOffset - contextSize
 	if start < 0 {
 		start = 0
 	}
 
-	end := offset + length + contextSize
+	end := runeOffset + runeLength + contextSize
 	if end > len(runes) {
 		end = len(runes)
 	}

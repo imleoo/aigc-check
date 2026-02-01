@@ -43,3 +43,21 @@ coverage.html
 
 # Configuration overrides
 /configs/local.yaml
+
+# Local Binaries
+aigc-check
+aigc-check-server
+
+# Docker artifacts
+*.tar
+
+# Generated Static Assets
+static/
+
+# Data
+data/*.db
+data/*.sqlite
+
+# Logs
+logs/
+
